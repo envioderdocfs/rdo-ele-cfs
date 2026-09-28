@@ -20,7 +20,7 @@ button {padding:14px; border:none; border-radius:8px; font-size:17px; font-weigh
 .btn-senha {background:#6A1B9A; color:white; padding:10px; font-size:15px;}
 .btn-cancelar {background:#757575; color:white; margin-right:8px; width:auto;}
 .aviso-senha-erro {color:#d32f2f; margin-top:8px; display:none; font-size:14px;}
-.tela-expirada {background:#ffebee; border:2px solid #d32f2f; padding:30px 20px; border-radius:12px; text-align:center; margin-top:20px;}
+.tela-expirada {background:#ffebee; border:2px solid #d32f2f; padding:30px 20px; border-radius:12px; text-align:center; margin-top:20px; display:none;}
 .painel-admin {background:#f3e5f5; border:2px solid #6A1B9A; border-radius:12px; padding:20px; margin-top:20px; display:none;}
 .painel-senha {display:none; margin-top:15px;}
 .rodape {text-align:center; margin-top:30px; padding:15px; color:#0055b8; font-size:14px; border-top:1px solid #b3d1f0;}
@@ -50,10 +50,6 @@ button {padding:14px; border:none; border-radius:8px; font-size:17px; font-weigh
 .aba-btn.ativa {background:#6A1B9A; color:white;}
 .aba-conteudo {display:none;}
 .aba-conteudo.ativa {display:block;}
-.lista-nomes-admin {background:white; border:1px solid #b3d1f0; border-radius:8px; padding:10px; margin:8px 0; max-height:150px; overflow-y:auto;}
-.nome-item-admin {display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border-bottom:1px solid #eef2f8;}
-.btn-excluir {background:#d32f2f; color:white; padding:6px 10px; font-size:13px; width:auto;}
-.btn-adicionar-nome {background:#0077ed; color:white; padding:8px 12px; font-size:14px; width:auto; margin:0;}
 .sucesso-salvo {color:#2e7d32; margin-top:10px; display:none; font-weight:bold;}
 </style>
 </head>
@@ -65,7 +61,7 @@ button {padding:14px; border:none; border-radius:8px; font-size:17px; font-weigh
 
 <h1>Registro de Atividades — RDO</h1>
 
-<div id="telaExpirada" class="tela-expirada" style="display:none;">
+<div id="telaExpirada" class="tela-expirada">
   <h2>Sistema Expirado</h2>
   <p>Para continuar, entre com a senha de Administrador e renove o prazo.</p>
   <label style="color:#c62828; margin-top:15px;">🔐 Senha de Administrador</label>
@@ -238,9 +234,9 @@ let listaAberta = false;
 let fotos = [];
 let mensagemFinal = "";
 
-// INICIALIZAÇÃO FORÇADA
+// INICIALIZAÇÃO FORÇADA — LIMPA E CARREGA NOVO
 function iniciar() {
-  localStorage.clear(); // LIMPA TUDO ANTIGO
+  localStorage.clear(); // APAGA TODOS OS DADOS ANTIGOS
   config = JSON.parse(JSON.stringify(DADOS_PADRAO));
   salvarStorage();
   verificarExpiracao();
@@ -253,15 +249,18 @@ function salvarStorage() {
 function verificarExpiracao() {
   const hoje = new Date(); hoje.setHours(0,0,0,0);
   const expira = new Date(config.dataExpiracao); expira.setHours(0,0,0,0);
+  
+  // MOSTRA TELA DE EXPIRAÇÃO SE PASSOU DA DATA
   if (hoje > expira) {
     document.getElementById('telaExpirada').style.display = 'block';
     document.getElementById('formApp').style.display = 'none';
-    return;
+  } else {
+    document.getElementById('telaExpirada').style.display = 'none';
+    document.getElementById('formApp').style.display = 'block';
   }
-  document.getElementById('telaExpirada').style.display = 'none';
-  document.getElementById('formApp').style.display = 'block';
 }
 
+// ACESSO PELA TELA DE EXPIRAÇÃO
 function verificarAcessoExpirado() {
   const s = document.getElementById('senhaExpirada').value;
   if (s === config.senha) {
@@ -273,6 +272,7 @@ function verificarAcessoExpirado() {
   }
 }
 
+// ABRE FORMULÁRIO E TELA DE SENHA
 function abrirSenha() {
   document.getElementById('painelSenha').style.display = 'block';
   document.getElementById('senhaAdmin').value = '';
@@ -284,6 +284,7 @@ function fecharSenha() {
   document.getElementById('painelSenha').style.display = 'none';
 }
 
+// VERIFICA SENHA DA ÁREA ADMIN
 function verificarSenha() {
   const s = document.getElementById('senhaAdmin').value;
   if (s === config.senha) {
